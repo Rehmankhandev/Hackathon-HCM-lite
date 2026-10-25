@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>HCM Lite — People Operations</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="auth-bg">
+    <main class="container py-4">
+        <div class="auth-card mx-auto">
+            <div class="text-center mb-4">
+                <div class="brand-mark">H</div>
+                <div class="eyebrow">HUMAN CAPITAL MANAGEMENT</div>
+                <h1 class="h2 fw-bold mb-2">HCM <span style="color:#5b4df6">Lite</span></h1>
+                <p class="text-muted mb-0">A modern people operations workspace for teams.</p>
+            </div>
+            <section id="setupBox">
+                <div class="premium-card" style="box-shadow:none;background:#fafaff">
+                    <div class="section-kicker">FIRST RUN</div>
+                    <h2 class="h5 mt-2 mb-1">Set up your company</h2>
+                    <p class="text-muted small">Create the workspace and your administrator account.</p>
+                    <form id="setupForm" novalidate>
+                        <div class="mb-3"><label>Company name</label><input id="companyName" class="form-control"
+                                placeholder="e.g. Nova Technologies" required></div>
+                        <div class="mb-3"><label>Admin name</label><input id="adminName" class="form-control"
+                                placeholder="Your full name" required></div>
+                        <div class="mb-3"><label>Admin email</label><input id="adminEmail" type="email"
+                                class="form-control" placeholder="admin@company.com" required></div>
+                        <div class="mb-3"><label>Admin password</label><input id="adminPassword" type="password"
+                                minlength="6" class="form-control" placeholder="Minimum 6 characters" required></div>
+                        <button class="gradient-btn w-100">Create workspace →</button>
+                    </form>
+                </div>
+            </section>
+            <section id="loginBox" class="d-none">
+                <div class="premium-card" style="box-shadow:none;background:#fafaff">
+                    <div class="section-kicker">SECURE ACCESS</div>
+                    <h2 class="h5 mt-2 mb-1">Welcome back</h2>
+                    <p id="loginCompany" class="text-muted small"></p>
+                    <form id="loginForm" novalidate>
+                        <div class="mb-3"><label>Email</label><input id="loginEmail" type="email" class="form-control"
+                                required></div>
+                        <div class="mb-3"><label>Password</label><input id="loginPassword" type="password"
+                                class="form-control" required></div>
+                        <div id="loginError" class="form-message error mb-3 d-none"></div><button
+                            class="gradient-btn w-100">Continue to workspace →</button>
+                    </form>
+                </div>
+            </section>
+            <div class="text-center mt-4"><small class="text-muted">HCM Lite • Hackathon prototype</small></div>
+        </div>
+    </main>
+    <script src="js/storage.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+
+</html>

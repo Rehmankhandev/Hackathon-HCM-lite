@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>HR Workspace - HCM Lite</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">H</div>
+                <div>HCM <span>LITE</span><small>PEOPLE OPERATIONS</small></div>
+            </div>
+            <div class="nav-label">HR MANAGEMENT</div><a class="nav-link active" href="hr.html"><i>⌂</i> HR
+                Dashboard</a><a class="nav-link" href="employees.html"><i>♙</i> Employees</a><a class="nav-link"
+                href="leaves.html"><i>◷</i> Leave Center</a><a class="nav-link" href="payslip.html"><i>▣</i> Payroll</a>
+            <div class="sidebar-footer">
+                <div class="mini-user">
+                    <div class="avatar" id="avatar">H</div>
+                    <div><b id="sideName">HR</b><small>HR Manager</small></div>
+                </div><button class="logout-btn" onclick="logout()">↪ Sign out</button>
+            </div>
+        </aside>
+        <main class="main-content">
+            <header class="topbar">
+                <div><button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+                    <div class="eyebrow">PEOPLE OPERATIONS</div><strong>HR Workspace</strong>
+                </div>
+                <div class="top-actions"><span class="soft-badge">HR Access</span></div>
+            </header>
+            <div class="page-wrap">
+                <section class="command-strip">
+                    <div><span class="section-kicker">HR OPERATIONS</span>
+                        <h1>Keep your people moving.</h1>
+                        <p>Manage employees, attendance, leave approvals and payroll review from one focused workspace.
+                        </p>
+                    </div>
+                    <div class="date-chip">TODAY<br><b id="dashDate">—</b></div>
+                </section>
+                <div class="kpi-rail">
+                    <div class="rail-stat"><span>PEOPLE</span><b id="headcount">0</b><small>active employees</small>
+                    </div>
+                    <div class="rail-stat"><span>PRESENT</span><b id="present">0</b><small>checked in today</small>
+                    </div>
+                    <div class="rail-stat"><span>LATE</span><b id="late">0</b><small>late today</small></div>
+                    <div class="rail-stat"><span>LEAVE</span><b id="onLeave">0</b><small>on approved leave</small></div>
+                </div>
+                <div class="hr-grid">
+                    <section class="section-card">
+                        <div class="card-heading">
+                            <div><span class="section-kicker">ATTENDANCE</span>
+                                <h2 class="unique-title">Today's board</h2>
+                            </div><a class="text-link" href="employees.html">Directory →</a>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table align-middle premium-table">
+                                <thead>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Check in</th>
+                                        <th>Check out</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attendanceTable"></tbody>
+                            </table>
+                        </div>
+                    </section>
+                    <aside>
+                        <section class="insight-card dark"><span class="section-kicker">HR PULSE</span>
+                            <h3>Approval queue</h3>
+                            <div class="pulse-line"><span>Pending leaves</span><b id="pending">0</b></div><a
+                                class="btn btn-light btn-sm mt-3" href="leaves.html">Review requests →</a>
+                        </section>
+                        <section class="section-card mini-panel mt-3"><span class="section-kicker">WORKFORCE</span>
+                            <h3>Quick actions</h3>
+                            <div class="quick-actions"><a href="employees.html" class="quick-action">Add employee
+                                    <span>→</span></a><a href="leaves.html" class="quick-action">Review leave
+                                    <span>→</span></a><a href="payslip.html" class="quick-action">Review payroll
+                                    <span>→</span></a></div>
+                        </section>
+                    </aside>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="../js/storage.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>requireRole("hr"); const s = getSession(), today = todayKey(); sideName.textContent = s.name || "HR"; avatar.textContent = (s.name || "H").charAt(0).toUpperCase(); dashDate.textContent = today; const employees = getUsers().filter(x => x.role === "employee"), att = getAttendance(), leaves = getLeaves(); headcount.textContent = employees.length; present.textContent = att.filter(x => x.date === today && x.checkIn).length; late.textContent = att.filter(x => x.date === today && x.status === "late").length; onLeave.textContent = employees.filter(e => leaves.some(l => l.employeeId === e.id && l.status === "approved" && today >= l.from && today <= l.to)).length; pending.textContent = leaves.filter(x => x.status === "pending").length; attendanceTable.innerHTML = employees.map(e => { const a = att.find(x => x.employeeId === e.id && x.date === today); return `<tr><td><b>${escapeHtml(e.name)}</b><br><small>${escapeHtml(e.department || "")}</small></td><td>${a?.checkIn || "—"}</td><td>${a?.checkOut || "—"}</td><td><span class="status-pill ${a?.status || "absent"}">${a?.status || "absent"}</span></td></tr>` }).join("") || emptyRow(4, "No employees yet."); function toggleSidebar() { sidebar.classList.toggle("show") }</script>
+</body>
+
+</html>

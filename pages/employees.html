@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employees - HCM Lite</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">H</div>
+        <div>HCM <span>LITE</span><small>PEOPLE OPERATIONS</small></div>
+      </div>
+      <div class="nav-label">MANAGEMENT</div>
+      <a class="nav-link" href="admin.html"><i>⌂</i> Dashboard</a><a class="nav-link active"
+        href="employees.html"><i>♙</i> Employees</a><a class="nav-link" href="leaves.html"><i>◷</i> Leave Center</a><a
+        class="nav-link" href="settings.html"><i>⚙</i> Company Setup</a><a class="nav-link" href="payslip.html"><i>▣</i>
+        Payroll</a>
+      <div class="sidebar-footer">
+        <div class="mini-user">
+          <div class="avatar" id="avatar">A</div>
+          <div><b id="sideName">Admin</b><small>Administrator</small></div>
+        </div><button class="logout-btn" onclick="logout()">↪ Sign out</button>
+      </div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar">
+        <div><button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+          <div class="eyebrow">PEOPLE HUB</div><strong>Employees</strong>
+        </div>
+        <div class="top-actions"><span class="soft-badge">Directory</span></div>
+      </header>
+      <div class="page-wrap employees-canvas">
+        <div class="people-heading">
+          <div><span class="section-kicker">WORKFORCE DIRECTORY</span>
+            <h1>Build your team view.</h1>
+            <p>Search people, open profiles and manage employee accounts without leaving the directory.</p>
+          </div><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#employeeModal">+ Add
+            employee</button>
+        </div>
+        <div class="people-workspace">
+          <section class="people-list section-card">
+            <div class="list-toolbar">
+              <div><span class="section-kicker">ALL PEOPLE</span>
+                <h2 class="unique-title">Employee directory</h2>
+              </div><span class="count-chip"><b id="employeeTotal">0</b> people</span>
+            </div>
+            <div class="search-dock"><input id="search" class="form-control" placeholder="Search name or email"
+                oninput="render()"><input id="deptFilter" class="form-control" placeholder="Filter department"
+                oninput="render()"></div>
+            <div class="table-responsive">
+              <table class="table align-middle premium-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Salary</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="employeeTable"></tbody>
+              </table>
+            </div>
+          </section>
+          <aside class="people-profile">
+            <section class="profile-board"><span class="section-kicker">WORKFORCE SNAPSHOT</span>
+              <div class="profile-number" id="employeeTotalSide">0</div>
+              <p>Active employee accounts</p>
+              <div class="profile-divider"></div>
+              <div class="profile-row"><span>Directory status</span><b>Ready</b></div>
+              <div class="profile-row"><span>Search</span><b>Live</b></div>
+            </section>
+            <section class="section-card create-card"><span class="section-kicker">QUICK CREATE</span>
+              <h3>Add a teammate</h3>
+              <p>Register a new employee and create their login credentials.</p><button class="btn btn-primary w-100"
+                data-bs-toggle="modal" data-bs-target="#employeeModal">Create employee →</button>
+            </section>
+          </aside>
+          <section class="section-card hr-create-card" id="hr-team">
+            <div class="card-heading">
+              <div><span class="section-kicker">HR ACCESS</span>
+                <h3 class="unique-title">HR team accounts</h3>
+                <p class="unique-sub">Only Admin can create HR logins. Click <b>+ Add HR</b> to give an HR member their
+                  own login.</p>
+              </div><button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#hrModal">+ Add HR</button>
+            </div>
+            <div class="hr-account-list" id="hrAccountList"></div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+  <div class="modal fade" id="employeeModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="employeeForm">
+          <div class="modal-header">
+            <h5 class="modal-title">Employee</h5><button type="button" class="btn-close"
+              data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="employeeId">
+            <div class="mb-3"><label class="form-label">Name</label><input id="eName" class="form-control" required>
+            </div>
+            <div class="mb-3"><label class="form-label">Email</label><input id="eEmail" type="email"
+                class="form-control" required></div>
+            <div class="mb-3"><label class="form-label">Password</label><input id="ePassword" class="form-control"
+                minlength="6" required></div>
+            <div class="mb-3"><label class="form-label">Role</label><select id="eRole" class="form-select" required>
+                <option value="employee">Employee</option>
+                <option value="hr">HR</option>
+              </select></div>
+            <div id="employeeDetails">
+              <div class="mb-3"><label class="form-label">Department</label><input id="eDepartment"
+                  class="form-control"></div>
+              <div class="mb-3"><label class="form-label">Salary</label><input id="eSalary" type="number" min="1"
+                  class="form-control"></div>
+            </div>
+            <div id="formError" class="text-danger small"></div>
+          </div>
+          <div class="modal-footer"><button class="btn btn-primary">Save Employee</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <div class="modal fade" id="hrModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="hrForm">
+          <div class="modal-header">
+            <h5 class="modal-title">Create HR Account</h5><button type="button" class="btn-close"
+              data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3"><label class="form-label">HR Name</label><input id="hrName" class="form-control" required>
+            </div>
+            <div class="mb-3"><label class="form-label">HR Email</label><input id="hrEmail" type="email"
+                class="form-control" required></div>
+            <div class="mb-3"><label class="form-label">Password</label><input id="hrPassword" type="password"
+                minlength="6" class="form-control" required></div>
+            <div id="hrFormError" class="text-danger small"></div>
+          </div>
+          <div class="modal-footer"><button class="btn btn-primary">Create HR Login</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script src="../js/storage.js"></script>
+  <script src="../js/auth.js"></script>
+  <script>function syncSidebarUser() { try { const su = getSession(); if (su) { const sn = document.getElementById('sideName'), av = document.getElementById('avatar'); if (sn) sn.textContent = su.name || 'User'; if (av) av.textContent = (su.name || 'U').charAt(0).toUpperCase(); } } catch (e) { } } syncSidebarUser();</script>
+  <script>
+    requireRole("admin");
+
+    function render() {
+      const q = (document.getElementById("search")?.value || "").toLowerCase().trim();
+      const d = (document.getElementById("deptFilter")?.value || "").toLowerCase().trim();
+      const all = Array.isArray(getUsers()) ? getUsers() : [];
+      const list = all.filter(x => (x.role === "employee" || x.role === "hr") &&
+        (!q || ((x.name || "") + " " + (x.email || "")).toLowerCase().includes(q)) &&
+        (!d || String(x.department || "").toLowerCase().includes(d)));
+      document.getElementById("employeeTotal").textContent = list.length;
+      const side = document.getElementById("employeeTotalSide"); if (side) side.textContent = list.length;
+      document.getElementById("employeeTable").innerHTML = list.map(e => `<tr>
+    <td><b>${escapeHtml(e.name || "")}</b></td>
+    <td>${escapeHtml(e.email || "")}</td>
+    <td>${e.role === "hr" ? '<span class="soft-badge">HR</span>' : escapeHtml(e.department || "—")}</td>
+    <td>${e.role === "hr" ? '—' : Number(e.salary || 0).toLocaleString()}</td>
+    <td><button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="editEmployee('${String(e.id)}')">Edit</button>
+    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeEmployee('${String(e.id)}')">Delete</button></td>
+  </tr>`).join("") || emptyRow(5, "No people found.");
+    }
+
+    function renderHR() {
+      const box = document.getElementById("hrAccountList"); if (!box) return;
+      const hrs = (getUsers() || []).filter(x => x.role === "hr");
+      box.innerHTML = hrs.length ? hrs.map(x => `<div class="hr-account"><div class="avatar">${escapeHtml((x.name || "H").charAt(0).toUpperCase())}</div><div><b>${escapeHtml(x.name || "")}</b><small>${escapeHtml(x.email || "")} · HR</small></div><span class="soft-badge">Active</span></div>`).join("") : '<div class="empty-state">No HR accounts yet. Create the first HR login.</div>';
+    }
+
+    const roleSelect = document.getElementById("eRole");
+    const employeeDetails = document.getElementById("employeeDetails");
+    function toggleEmployeeDetails() {
+      const isEmployee = roleSelect.value === "employee";
+      employeeDetails.style.display = isEmployee ? "block" : "none";
+      document.getElementById("eDepartment").required = isEmployee;
+      document.getElementById("eSalary").required = isEmployee;
+    }
+    roleSelect.addEventListener("change", toggleEmployeeDetails);
+    toggleEmployeeDetails();
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (window.bootstrap && bootstrap.Modal) {
+        (bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el)).hide();
+      } else { el.classList.remove("show"); el.style.display = "none"; }
+    }
+
+    function savePerson(e) {
+      e.preventDefault();
+      const error = document.getElementById("formError"); error.textContent = "";
+      try {
+        const name = document.getElementById("eName").value.trim();
+        const email = document.getElementById("eEmail").value.trim().toLowerCase();
+        const password = document.getElementById("ePassword").value;
+        const role = document.getElementById("eRole").value;
+        const department = document.getElementById("eDepartment").value.trim();
+        const salary = Number(document.getElementById("eSalary").value);
+        const editId = document.getElementById("employeeId").value;
+        if (!name || !email || !password) { error.textContent = "Name, email and password are required."; return false; }
+        if (password.length < 6) { error.textContent = "Password must be at least 6 characters."; return false; }
+        if (role === "employee" && (!department || !Number.isFinite(salary) || salary <= 0)) { error.textContent = "For Employee, Department and Salary are required."; return false; }
+        let users = Array.isArray(getUsers()) ? getUsers() : [];
+        if (users.some(x => String(x.email || "").toLowerCase() === email && String(x.id) !== String(editId))) { error.textContent = "This email is already used."; return false; }
+        const data = { name, email, password, role, department: role === "employee" ? department : "", salary: role === "employee" ? salary : 0 };
+        if (editId) {
+          const index = users.findIndex(x => String(x.id) === String(editId));
+          if (index < 0) { error.textContent = "Employee record not found."; return false; }
+          users[index] = { ...users[index], ...data };
+        } else {
+          users.push({ id: String(Date.now()) + Math.random().toString(36).slice(2, 7), ...data });
+        }
+        saveUsers(users);
+        document.getElementById("employeeForm").reset();
+        document.getElementById("employeeId").value = "";
+        roleSelect.value = "employee"; toggleEmployeeDetails();
+        document.querySelector("#employeeModal .modal-title").textContent = "Add Employee";
+        closeModal("employeeModal");
+        render(); renderHR();
+      } catch (err) {
+        console.error(err); error.textContent = "Save failed: " + (err.message || "Unknown error");
+      }
+      return false;
+    }
+    document.getElementById("employeeForm").addEventListener("submit", savePerson);
+
+    function editEmployee(id) {
+      const u = (getUsers() || []).find(x => String(x.id) === String(id)); if (!u) return;
+      document.getElementById("employeeId").value = u.id;
+      document.getElementById("eName").value = u.name || "";
+      document.getElementById("eEmail").value = u.email || "";
+      document.getElementById("ePassword").value = u.password || "";
+      roleSelect.value = u.role || "employee";
+      document.getElementById("eDepartment").value = u.department || "";
+      document.getElementById("eSalary").value = u.salary || "";
+      toggleEmployeeDetails();
+      document.querySelector("#employeeModal .modal-title").textContent = u.role === "hr" ? "Edit HR" : "Edit Employee";
+      new bootstrap.Modal(document.getElementById("employeeModal")).show();
+    }
+
+    function removeEmployee(id) {
+      if (!confirm("Delete this account?")) return;
+      saveUsers((getUsers() || []).filter(x => String(x.id) !== String(id)));
+      saveAttendance((getAttendance() || []).filter(x => String(x.employeeId) !== String(id)));
+      saveLeaves((getLeaves() || []).filter(x => String(x.employeeId) !== String(id)));
+      render(); renderHR();
+    }
+
+    document.getElementById("hrForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const err = document.getElementById("hrFormError"); err.textContent = "";
+      try {
+        const name = document.getElementById("hrName").value.trim();
+        const email = document.getElementById("hrEmail").value.trim().toLowerCase();
+        const password = document.getElementById("hrPassword").value;
+        if (!name || !email || !password) { err.textContent = "Please fill all fields."; return; }
+        if (password.length < 6) { err.textContent = "Password must be at least 6 characters."; return; }
+        let users = Array.isArray(getUsers()) ? getUsers() : [];
+        if (users.some(x => String(x.email || "").toLowerCase() === email)) { err.textContent = "This email is already used."; return; }
+        users.push({ id: String(Date.now()) + Math.random().toString(36).slice(2, 7), name, email, password, role: "hr", department: "", salary: 0 });
+        saveUsers(users);
+        this.reset(); closeModal("hrModal"); render(); renderHR();
+      } catch (ex) { console.error(ex); err.textContent = "HR save failed: " + (ex.message || "Unknown error"); }
+    });
+
+    function toggleSidebar() { document.getElementById("sidebar").classList.toggle("show") }
+    render(); renderHR();
+  </script>
+</body>
+
+</html>

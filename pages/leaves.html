@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Leave Center — HCM Lite</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">H</div>
+                <div>HCM <span>LITE</span><small>PEOPLE OPERATIONS</small></div>
+            </div>
+            <div class="nav-label">MANAGEMENT</div><a class="nav-link" href="admin.html"><i>⌂</i> Dashboard</a><a
+                class="nav-link" href="employees.html"><i>♙</i> Employees</a><a class="nav-link active"
+                href="leaves.html"><i>◷</i> Leave Center</a><a class="nav-link" href="settings.html"><i>⚙</i> Company
+                Setup</a><a class="nav-link" href="payslip.html"><i>▣</i> Payroll</a>
+            <div class="sidebar-footer">
+                <div class="mini-user">
+                    <div class="avatar" id="avatar">A</div>
+                    <div><b id="sideName">Admin</b><small>Administrator</small></div>
+                </div><button class="logout-btn" onclick="logout()">↪ Sign out</button>
+            </div>
+        </aside>
+        <main class="main-content">
+            <header class="topbar">
+                <div><button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+                    <div class="eyebrow">PEOPLE OPERATIONS</div><strong>Leave Center</strong>
+                </div>
+                <div class="top-actions"><span class="live-dot"></span><span>Live local workspace</span>
+                    <div class="top-avatar" id="topAvatar">A</div>
+                </div>
+            </header>
+            <div class="page-wrap">
+                <section class="hero-banner">
+                    <div>
+                        <div class="eyebrow light">LEAVE MANAGEMENT</div>
+                        <h1>Keep time-off decisions simple.</h1>
+                        <p>Review requests, protect leave quotas and keep every approval visible in one professional
+                            workspace.</p>
+                    </div>
+                    <div class="hero-orb">◌</div>
+                </section>
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-xl-3">
+                        <div class="metric-card purple"><span>Pending requests</span><strong
+                                id="pendingCount">0</strong><small>Need review</small></div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                        <div class="metric-card green"><span>Approved</span><strong
+                                id="approvedCount">0</strong><small>All requests</small></div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                        <div class="metric-card orange"><span>Reserved days</span><strong
+                                id="reservedDays">0</strong><small>Pending paid leave</small></div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                        <div class="metric-card blue"><span>Employees</span><strong
+                                id="employeeCount">0</strong><small>Active profiles</small></div>
+                    </div>
+                </div>
+                <div class="premium-card">
+                    <div class="card-heading">
+                        <div><span class="section-kicker">REQUEST QUEUE</span>
+                            <h2>Leave requests</h2>
+                        </div><span class="soft-badge" id="queueBadge">0 pending</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table premium-table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Leave type</th>
+                                    <th>Dates</th>
+                                    <th>Days</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Decision</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaveTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="../js/storage.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>requireRole('admin'); const me = getSession(); document.getElementById('sideName').textContent = me.name; document.getElementById('avatar').textContent = me.name[0]; document.getElementById('topAvatar').textContent = me.name[0]; function pill(s) { const m = { approved: ['Approved', 'green'], rejected: ['Rejected', 'red'], pending: ['Pending', 'yellow'] }; const x = m[s] || [s, '']; return `<span class="status-pill ${x[1]}">${x[0]}</span>` } function render() { const leaves = getLeaves(), emps = getUsers().filter(u => u.role === 'employee'), pending = leaves.filter(x => x.status === 'pending'), approved = leaves.filter(x => x.status === 'approved'); document.getElementById('pendingCount').textContent = pending.length; document.getElementById('approvedCount').textContent = approved.length; document.getElementById('reservedDays').textContent = pending.filter(x => x.type !== 'Unpaid').reduce((n, x) => n + Number(x.days || 0), 0); document.getElementById('employeeCount').textContent = emps.length; document.getElementById('queueBadge').textContent = `${pending.length} pending`; document.getElementById('leaveTable').innerHTML = leaves.slice().sort((a, b) => b.id - a.id).map(l => { const balance = l.type === 'Unpaid' ? Infinity : leaveBalance(l.employeeId, l.type); const canApprove = l.type === 'Unpaid' || (balance + Number(l.days || 0) >= Number(l.days || 0)); return `<tr><td><div class="fw-bold" style="color:#20263a">${escapeHtml(userName(l.employeeId))}</div><small class="text-muted">Employee</small></td><td><span class="soft-badge">${escapeHtml(l.type)}</span></td><td>${l.from}<br><small class="text-muted">to ${l.to}</small></td><td><b>${l.days}</b></td><td style="max-width:220px">${escapeHtml(l.reason || '—')}</td><td>${pill(l.status)}</td><td class="text-end">${l.status === 'pending' ? `<button class="btn btn-sm btn-success me-1" onclick="decide(${l.id},'approved')">Approve</button><button class="btn btn-sm btn-outline-danger" onclick="decide(${l.id},'rejected')">Reject</button>` : '<span class="text-muted">Completed</span>'}</td></tr>` }).join('') || emptyRow(7, 'No leave requests yet.'); } function decide(id, status) { const arr = getLeaves(), x = arr.find(v => v.id === id); if (!x) return; if (status === 'approved' && x.type !== 'Unpaid') { const approved = approvedLeaveDays(x.employeeId, x.type); const otherPending = getLeaves().filter(v => v.employeeId === x.employeeId && v.type === x.type && v.id !== x.id && v.status === 'pending').reduce((n, v) => n + Number(v.days || 0), 0); const quota = leaveQuota(x.type); if (approved + Number(x.days) + otherPending > quota) { alert(`Cannot approve: quota is ${quota} day(s); approved ${approved} + other pending ${otherPending} + this request ${x.days} exceeds the quota.`); return } } const comment = prompt(status === 'approved' ? 'Approval note (optional):' : 'Reason for rejection:') ?? ''; x.status = status; x.comment = comment; x.decidedAt = new Date().toISOString(); saveLeaves(arr); render() } function toggleSidebar() { document.getElementById('sidebar').classList.toggle('show') } render();</script>
+</body>
+
+</html>

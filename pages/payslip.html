@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payslip - HCM Lite</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">H</div>
+        <div>HCM <span>LITE</span><small>PEOPLE OPERATIONS</small></div>
+      </div>
+      <div class="nav-label">MANAGEMENT</div>
+      <a class="nav-link" href="admin.html"><i>⌂</i> Dashboard</a><a class="nav-link" href="employees.html"><i>♙</i>
+        Employees</a><a class="nav-link" href="leaves.html"><i>◷</i> Leave Center</a><a class="nav-link"
+        href="settings.html"><i>⚙</i> Company Setup</a><a class="nav-link active" href="payslip.html"><i>▣</i>
+        Payroll</a>
+      <div class="sidebar-footer">
+        <div class="mini-user">
+          <div class="avatar" id="avatar">A</div>
+          <div><b id="sideName">Admin</b><small>Administrator</small></div>
+        </div><button class="logout-btn" onclick="logout()">↪ Sign out</button>
+      </div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar">
+        <div><button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+          <div class="eyebrow">FINANCE DESK</div><strong>Payroll</strong>
+        </div>
+        <div class="top-actions"><span class="soft-badge">Monthly</span><select id="employeeSelect"
+            class="form-select form-select-sm" style="width:220px;display:none"></select></div>
+      </header>
+      <div class="page-wrap payroll-canvas">
+        <div class="payroll-head">
+          <div><span class="section-kicker">PAYROLL STATEMENT</span>
+            <h1>Salary, without the clutter.</h1>
+            <p>A presentation-ready monthly view of earnings, attendance deductions and net pay.</p>
+          </div><button class="btn btn-primary" onclick="window.print()">Print / PDF ↗</button>
+        </div>
+        <div class="payroll-board">
+          <section class="salary-sheet section-card" id="slip">
+            <div class="sheet-top">
+              <div><span class="section-kicker">MONTHLY PAYSLIP</span>
+                <h2 id="company"></h2>
+                <p>Salary statement · <span id="month"></span></p>
+              </div>
+              <div class="net-block"><span>NET PAY</span><b id="net">0</b></div>
+            </div>
+            <div class="employee-strip">
+              <div><small>EMPLOYEE</small><b id="employee"></b></div>
+              <div><small>PAY PERIOD</small><b id="month2"></b></div>
+            </div>
+            <div class="earnings-grid">
+              <div class="earning"><span>Gross salary</span><b id="salary">0</b></div>
+              <div class="earning"><span>Absent days</span><b id="absent">0</b></div>
+              <div class="earning"><span>Half days</span><b id="half">0</b></div>
+            </div>
+            <div class="deduction-line"><span>Attendance deduction</span><b id="deduction">0</b></div>
+          </section>
+          <aside class="payroll-insights">
+            <section class="finance-card"><span class="section-kicker">PAYROLL HEALTH</span>
+              <div class="finance-big">READY</div>
+              <p>Current salary is calculated from the employee record and attendance data.</p>
+              <div class="finance-check"><span>✓</span> Attendance linked</div>
+              <div class="finance-check"><span>✓</span> Local calculation</div>
+            </section>
+            <section class="section-card formula-card"><span class="section-kicker">CALCULATION</span>
+              <h3>How net pay is formed</h3>
+              <div class="formula-step"><i>01</i><span>Gross salary</span><b>Base</b></div>
+              <div class="formula-step"><i>02</i><span>Attendance</span><b>Deduct</b></div>
+              <div class="formula-step"><i>03</i><span>Net salary</span><b>Final</b></div>
+            </section>
+          </aside>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="../js/storage.js"></script>
+  <script src="../js/auth.js"></script>
+  <script>function syncSidebarUser() { try { const su = getSession(); if (su) { const sn = document.getElementById('sideName'), av = document.getElementById('avatar'); if (sn) sn.textContent = su.name || 'User'; if (av) av.textContent = (su.name || 'U').charAt(0).toUpperCase(); } } catch (e) { } } syncSidebarUser();</script>
+  <script>
+    const s = getSession();
+    if (!s) location.href = "../index.html";
+
+    const companyData = getCompany() || { name: "HCM Lite" };
+    const companyEl = document.getElementById("company");
+    if (companyEl) companyEl.textContent = companyData.name || "HCM Lite";
+
+    const monthLabel = new Date().toLocaleString(undefined, { month: "long", year: "numeric" });
+    month.textContent = monthLabel;
+    month2.textContent = monthLabel;
+
+    const employeeSelect = document.getElementById("employeeSelect");
+    const allEmployees = getUsers().filter(u => u.role === "employee");
+
+    function renderPayslip(employee) {
+      if (!employee) {
+        employee.textContent = "No employee selected";
+        salary.textContent = "0";
+        absent.textContent = "0";
+        half.textContent = "0";
+        deduction.textContent = "0";
+        document.getElementById("net").textContent = "0";
+        document.querySelector(".finance-big").textContent = "WAITING";
+        return;
+      }
+
+      const employeeSalary = Number(employee.salary);
+      const safeSalary = Number.isFinite(employeeSalary) && employeeSalary > 0 ? employeeSalary : 0;
+      const now = new Date();
+      const year = now.getFullYear(), monthIndex = now.getMonth();
+      const lastDay = new Date(year, monthIndex + 1, 0).getDate();
+      const from = `${year}-${String(monthIndex + 1).padStart(2, '0')}-01`;
+      const to = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+      const work = workingDays(from, to);
+      const prefix = `${year}-${String(monthIndex + 1).padStart(2, '0')}`;
+      const records = getAttendance().filter(x => String(x.employeeId) === String(employee.id) && String(x.date || '').startsWith(prefix));
+      const absentDays = Math.max(0, work - records.length);
+      const halfDays = records.filter(x => x.status === "half_day").length;
+      const perDay = work > 0 ? safeSalary / work : 0;
+      const deductionAmount = perDay * (absentDays + 0.5 * halfDays);
+      const netAmount = Math.max(0, safeSalary - deductionAmount);
+
+      document.getElementById("employee").textContent = employee.name || "Employee";
+      document.getElementById("salary").textContent = safeSalary.toLocaleString();
+      document.getElementById("absent").textContent = absentDays;
+      document.getElementById("half").textContent = halfDays;
+      document.getElementById("deduction").textContent = Math.round(deductionAmount).toLocaleString();
+      document.getElementById("net").textContent = Math.round(netAmount).toLocaleString();
+      document.querySelector(".finance-big").textContent = safeSalary > 0 ? "READY" : "NO SALARY";
+    }
+
+    if (s.role === "admin") {
+      employeeSelect.style.display = "block";
+      employeeSelect.innerHTML = allEmployees.length
+        ? allEmployees.map(e => `<option value="${e.id}">${escapeHtml(e.name)} — ${Number(e.salary) || 0}</option>`).join("")
+        : '<option value="">No employees</option>';
+      employeeSelect.addEventListener("change", () => {
+        const chosen = allEmployees.find(e => String(e.id) === String(employeeSelect.value));
+        renderPayslip(chosen);
+      });
+      renderPayslip(allEmployees[0]);
+    } else {
+      document.querySelectorAll('a[href="admin.html"],a[href="employees.html"],a[href="leaves.html"],a[href="settings.html"]').forEach(el => el.remove());
+      renderPayslip(s);
+    }
+
+    function toggleSidebar() { document.getElementById("sidebar").classList.toggle("show") }
+  </script>
+  </script>
+</body>
+
+</html>
